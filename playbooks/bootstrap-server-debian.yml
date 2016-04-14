@@ -45,7 +45,7 @@
       copy: src=../config/apt_periodic dest=/etc/apt/apt.conf.d/10periodic
 
     - name: Add deploy user
-      user: name="{{ deploy_user_name }}" password="{{ deploy_password }}" shell=/bin/bash
+      user: name="{{ deploy_user_name }}" password="{{ deploy_password | password_hash('sha512') }}" shell=/bin/bash
 
     - name: Add authorized keys for deploy user
       authorized_key: user="{{ deploy_user_name }}" key="{{ lookup('file', '/Users/philip/.ssh/id_rsa-philip@variableconsulting.com.pub') }}"
