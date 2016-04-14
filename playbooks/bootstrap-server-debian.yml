@@ -39,8 +39,8 @@
       apt: state=installed pkg={{ item }}
       with_items: "{{ common_required_packages }}"
 
-    - name: Install optional packages
-      apt: state=installed pkg={{ item }}
+    - name: Install latest version of optional packages
+      apt: state=latest pkg={{ item }}
       with_items: "{{ common_optional_packages }}"
 
     - name: Adjust APT update intervals
