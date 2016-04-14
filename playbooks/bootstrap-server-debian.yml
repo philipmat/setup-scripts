@@ -16,6 +16,8 @@
 
     common_optional_packages:
       - vim
+      - htop
+      - git
 
     initial_ssh_port: 22
     final_ssh_port: 22
