@@ -51,9 +51,6 @@
       authorized_key: user="{{ deploy_user_name }}" key="{{ lookup('file', '/Users/philip/.ssh/id_rsa-philip@variableconsulting.com.pub') }}"
       with_items: "{{ deploy_public_keys }}"
       
-      #- name: Add keys
-      # authorized_key: user="{{ deploy_user_name }}" key="{{ lookup('file', '/Users/philip/.ssh/id_rsa-philip@variableconsulting.com.pub') }}"
-
     - name: Add deploy user to sudoers
       lineinfile: dest=/etc/sudoers
                   regexp="{{ deploy_user_name }} ALL"
