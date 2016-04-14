@@ -1,0 +1,115 @@
+#playbook-bootstrap_debian.yml
+---
+- hosts: all
+  vars:
+    deploy_user_name: moof
+    # specify password with --extra-vars "deploy_password=moof-password
+    deploy_public_keys:
+      - "(homedir)+/.ssh/id_rsa-philip@variableconsulting.com.pub"
+
+    common_required_packages:
+      - sudo
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+      - logwatch
+
+    common_optional_packages:
+      - vim
+
+    initial_ssh_port: 22
+    final_ssh_port: 22
+
+  tasks:
+    - fail: msg="Please specify deploy password with --extra-vars 'deploy_password=...'."
+      when: deploy_password is undefined
+
+    - name: Update APT package cache
+      apt: update_cache=yes cache_valid_time=3600
+
+    - name: Get aptitude for upgrade
+      apt: pkg=aptitude state=present
+      
+    - name: Upgrade APT to the latest packages
+      apt: upgrade=safe
+
+    - name: Install required packages
+      apt: state=installed pkg={{ item }}
+      with_items: "{{ common_required_packages }}"
+
+    - name: Install optional packages
+      apt: state=installed pkg={{ item }}
+      with_items: "{{ common_optional_packages }}"
+
+    - name: Adjust APT update intervals
+      copy: src=../config/apt_periodic dest=/etc/apt/apt.conf.d/10periodic
+
+    - name: Add deploy user
+      user: name="{{ deploy_user_name }}" password="{{ deploy_password }}" shell=/bin/bash
+
+    - name: Add authorized keys for deploy user
+      authorized_key: user="{{ deploy_user_name }}" key="{{ lookup('file', '/Users/philip/.ssh/id_rsa-philip@variableconsulting.com.pub') }}"
+      with_items: "{{ deploy_public_keys }}"
+      
+      #- name: Add keys
+      # authorized_key: user="{{ deploy_user_name }}" key="{{ lookup('file', '/Users/philip/.ssh/id_rsa-philip@variableconsulting.com.pub') }}"
+
+    - name: Add deploy user to sudoers
+      lineinfile: dest=/etc/sudoers
+                  regexp="{{ deploy_user_name }} ALL"
+                  line="{{ deploy_user_name }} ALL=(ALL) ALL"
+                  state=present
+
+    - name: Allow ssh traffic
+      ufw: rule=allow port={{ initial_ssh_port }} proto=tcp
+
+#    - name: Allow ssh traffic
+#      ufw: rule=allow port={{ item }} proto=tcp
+#      with_items: 
+#        - initial_ssh_port
+#        - final_ssh_port
+
+    - name: Setup ufw
+      ufw: state=enabled policy=deny
+
+#    - name: Set up Postfix to relay mail
+#      debconf: name=postfix
+#               question='{{ item.question }}'
+#               value='{{ item.value }}'
+#               vtype='{{ item.vtype }}'
+#      with_items:
+#        - { question: 'postfix/mailname', value: '{{ ansible_fqdn }}', vtype: 'string' }
+#        - { question: 'postfix/main_mailer_type', value: 'Internet Site', vtype: 'string' }
+
+#    - name: Email log summary daily
+#      lineinfile: dest=/etc/cron.daily/00logwatch
+#                  regexp="^/usr/sbin/logwatch"
+#                  line="/usr/sbin/logwatch --output mail --mailto {{ COMMON_LOGWATCH_EMAIL }} --detail high"
+#                  state=present create=yes
+
+#    - name: Change ssh port
+#      lineinfile: dest=/etc/ssh/sshd_config
+#                  regexp="^Port\s"
+#                  line="Port {{ final_ssh_port }}"
+#                  state=present
+#      when: final_ssh_port != initial_ssh_port
+#      notify: Restart ssh
+
+    - name: Disallow password authentication
+      lineinfile: dest=/etc/ssh/sshd_config
+                  regexp="^PasswordAuthentication"
+                  line="PasswordAuthentication no"
+                  state=present
+      notify: Restart ssh
+
+    - name: Disallow root SSH access
+      lineinfile: dest=/etc/ssh/sshd_config
+                  regexp="^PermitRootLogin"
+                  line="PermitRootLogin no"
+                  state=present
+      notify: Restart ssh
+
+  handlers:
+    - name: Restart ssh
+      service: name=ssh state=restarted
+
