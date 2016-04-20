@@ -13,10 +13,6 @@
       - firewalld
       - fail2ban
       - logwatch
-      - libffi
-      - libffi-devel
-      - python-devel
-      - openssl-devel
 
     common_optional_packages:
       - vim
@@ -74,17 +70,16 @@
                   line="{{ deploy_user_name }} ALL=(ALL) ALL"
                   state=present
 
-    - name: Prepare to configure firewall
-      pip: name={{ item }}
-      with_items: 
-        - pycrypto
-        - pyopenssl 
-        - ndg-httpsclient 
-        - pyasn1
-        - firewalld
+    - name: Enable firewall at boot and start it
+      service: name=firewalld enabled=yes state=started
 
-    - name: Allow ssh traffic through firewall
-      firewalld: service=ssh permanent=true state=enabled
+    - name: Allow services  through firewall
+      command: firewall-cmd --permanent --zone=public --add-service={{ item }}
+      with_items:
+        - ssh
+      notify: 
+        - Reload firewall
+
 
 #    - name: Set up Postfix to relay mail
 #      debconf: name=postfix
@@ -126,4 +121,9 @@
   handlers:
     - name: Restart ssh
       service: name=ssh state=restarted
+    - name: Restart firewall
+      service: name=firewalld enabled=yes state=started
+    - name: Reload firewall
+      command: firewall-cmd --reload
+
 
