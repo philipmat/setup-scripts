@@ -70,15 +70,15 @@
                   line="{{ deploy_user_name }} ALL=(ALL) ALL"
                   state=present
 
-    - name: Enable firewall at boot and start it
-      service: name=firewalld enabled=yes state=started
-
-    - name: Allow services  through firewall
-      command: firewall-cmd --permanent --zone=public --add-service={{ item }}
-      with_items:
-        - ssh
-      notify: 
-        - Reload firewall
+#    - name: Enable firewall at boot and start it
+#      service: name=firewalld enabled=yes state=started
+#
+#    - name: Allow services  through firewall
+#      command: firewall-cmd --permanent --zone=public --add-service={{ item }}
+#      with_items:
+#        - ssh
+#      notify: 
+#        - Reload firewall
 
 
 #    - name: Set up Postfix to relay mail
