@@ -13,3 +13,18 @@
     - git
     - tmux
 
+- name: Check if pip is installed
+  command: which pip
+  register: pip_task_installed
+  changed_when: no
+  failed_when: no
+
+- name: Download pip installer
+  get_url:
+    url=https://bootstrap.pypa.io/get-pip.py
+    dest="/tmp/get-pip.py"
+  when: pip_task_installed is defined and pip_task_installed.rc != 0
+
+- name: Run pip installer
+  command: "python /tmp/get-pip.py"
+  when: pip_task_installed is defined and pip_task_installed.rc != 0
