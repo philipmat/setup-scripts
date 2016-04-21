@@ -1,0 +1,7 @@
+# handlers/main.yaml
+---
+- name: Restart firewalld
+  service: name=firewalld state=restarted
+
+- name: Restart ufw
+  service: name=ufw state=restarted
