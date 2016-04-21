@@ -10,6 +10,8 @@ ROLE
 	exit 1
 fi
 
+# organized according to Ansible - Best Practices
+# http://docs.ansible.com/ansible/playbooks_best_practices.html#directory-layout
 for f in defaults files handlers meta tasks templates vars ; do 
 	role_dir=roles/$role_name/$f
 	mkdir -pv $role_dir
