@@ -2,4 +2,14 @@
 - hosts: all
   roles:
     - install-utils
+    # - firewall
+    # - syslog
+    # - postfix
     - deploy-user
+# now switch to deploy user. split playbook file based on server type?
+# - nginx
+# - checkout dot-files
+# - build static sites
+# - set up all dynamic apps:
+#   - mailinator-clone
+#   - git hooks for heroku-like auto apps
