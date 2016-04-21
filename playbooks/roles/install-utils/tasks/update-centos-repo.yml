@@ -1,0 +1,8 @@
+# Update the CentOS yum cache
+---
+- name: Install EPEL-release to gain access to a larger set of packages
+  package: state=present name=epel-release
+
+- name: Update yum cache
+  command: yum -y update
+      

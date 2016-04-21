@@ -1,0 +1,8 @@
+# vars/main.yaml
+---
+deploy_user_group: deployment
+deploy_user_name: moof
+# specify password with --extra-vars "deploy_password=moof-password
+deploy_public_keys:
+  - ../config/id_rsa-pub
+sshd_name: "{{ 'ssh' if ansible_os_family == 'Debian' else 'sshd' }}"

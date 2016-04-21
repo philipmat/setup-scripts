@@ -1,0 +1,7 @@
+# vars/main.yaml
+---
+openvz_guest: "{{ ansible_virtualization_type == 'openvz' }}" # or ansible_virtualization_role == 'guest'
+open_ports:
+  - { port: 22, proto: tcp } # ssh
+  
+

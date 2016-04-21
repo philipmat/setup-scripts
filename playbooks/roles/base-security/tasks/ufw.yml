@@ -1,0 +1,12 @@
+# Installs and configures UFW
+- name: Install UFW
+  package: state=present name=ufw
+
+- name: Allow ssh traffic
+  ufw: rule=allow port={{ item.port }} proto={{ item.proto }}
+  with_items: "{{ open_ports }}"
+
+- name: Setup ufw
+  ufw: state=enabled policy=deny
+  notify: Restart ufw
+

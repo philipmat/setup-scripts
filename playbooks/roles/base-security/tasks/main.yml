@@ -1,0 +1,14 @@
+# tasks/main.yaml
+---
+- debug: msg="ansible_os_family={{ ansible_os_family }}, openvz_guest={{ openvz_guest }}".
+- include: ufw.yml
+  when: ansible_os_family == 'Debian'
+- include: firewalld.yml
+  when: ansible_os_family == 'RedHat' and openvz_guest == False
+- include: iptables.yml
+  when: ansible_os_family == 'RedHat' and openvz_guest == True
+- name: Install security-related components
+  package: state=present name={{ item }}
+  with_items:
+    - fail2ban
+

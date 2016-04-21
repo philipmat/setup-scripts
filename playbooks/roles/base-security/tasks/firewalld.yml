@@ -1,0 +1,13 @@
+# RedHat/CentOS family: Setup firewalld.
+# Firewalld doesn't work with OpenVZ so use iptables.yml instead.
+- name: Install firewalld
+  package: state=present name=firewalld
+
+- name: Enable firewall at boot and start it
+  service: name=firewalld enabled=yes state=started
+
+- name: Allow services  through firewall
+  command: firewall-cmd --permanent --zone=public --add-port={{ item.port}}/{{ item.proto }}
+  with_items: "{{ open_ports }}"
+  notify: 
+    - Reload firewalld
