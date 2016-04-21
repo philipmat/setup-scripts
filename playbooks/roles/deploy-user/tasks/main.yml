@@ -1,0 +1,37 @@
+# tasks/main.yaml
+---
+- fail: msg="Please specify deploy password with --extra-vars 'deploy_password=...'."
+  when: deploy_password is undefined
+
+- name: Add deploy group
+  group: name="{{ deploy_user_group }}" state=present
+- name: Add deploy user
+  user: 
+    name: "{{ deploy_user_name }}" 
+    password: "{{ deploy_password | password_hash('sha512') }}" 
+    group: "{{ deploy_user_group }}"
+    shell: /bin/bash
+
+- name: Add authorized keys for deploy user
+  authorized_key: user="{{ deploy_user_name }}" key="{{ lookup('file', item) }}"
+  with_items: "{{ deploy_public_keys }}"
+  
+- name: Add deploy user to sudoers
+  lineinfile: dest=/etc/sudoers
+              regexp="{{ deploy_user_name }} ALL"
+              line="{{ deploy_user_name }} ALL=(ALL) ALL"
+              state=present
+
+- name: Disallow password authentication
+  lineinfile: dest=/etc/ssh/sshd_config
+              regexp="^PasswordAuthentication"
+              line="PasswordAuthentication no"
+              state=present
+  notify: Restart ssh
+
+- name: Disallow root SSH access
+  lineinfile: dest=/etc/ssh/sshd_config
+              regexp="^PermitRootLogin"
+              line="PermitRootLogin no"
+              state=present
+  notify: Restart ssh

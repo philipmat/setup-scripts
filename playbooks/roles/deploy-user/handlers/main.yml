@@ -1,0 +1,4 @@
+# handlers/main.yaml
+---
+- name: Restart ssh
+  service: name=sshd state=restarted
