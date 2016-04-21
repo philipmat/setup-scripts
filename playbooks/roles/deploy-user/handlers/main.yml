@@ -1,4 +1,4 @@
 # handlers/main.yaml
 ---
 - name: Restart ssh
-  service: name=sshd state=restarted
+  service: name={{ sshd_name }} state=restarted
