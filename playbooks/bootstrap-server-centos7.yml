@@ -10,7 +10,6 @@
     common_required_packages:
       - "@Development tools"
       - sudo
-      - firewalld
       - fail2ban
       - logwatch
 
